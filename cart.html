@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keranjang</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>Keranjang Belanja</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Produk</th>
+                <th>Harga</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="cart-items"></tbody>
+    </table>
+    <button onclick="checkout()">Checkout</button>
+
+    <script>
+        function loadCart() {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            let cartItems = document.getElementById("cart-items");
+            cartItems.innerHTML = "";
+            cart.forEach((item, index) => {
+                cartItems.innerHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>Rp ${item.price}</td>
+                        <td><button onclick="removeFromCart(${index})">Hapus</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            loadCart();
+        }
+
+        function checkout() {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) {
+                alert("Keranjang kosong!");
+                return;
+            }
+
+            let customerName = prompt("Masukkan nama Anda:");
+            let email = prompt("Masukkan email Anda:");
+
+            if (!customerName || !email) {
+                alert("Nama dan Email wajib diisi!");
+                return;
+            }
+
+            fetch("checkout.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ customerName, email, cart })
+            }).then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    localStorage.removeItem("cart");
+                    window.location.href = "index.php";
+                }
+            });
+        }
+
+        loadCart();
+    </script>
+</body>
+</html>

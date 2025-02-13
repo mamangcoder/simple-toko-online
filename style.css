@@ -1,0 +1,8 @@
+.product-container {
+  display: flex;
+  gap: 20px;
+}
+.product img {
+  width: 100px;
+  height: 100px;
+}
